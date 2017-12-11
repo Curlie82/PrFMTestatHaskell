@@ -5,18 +5,22 @@ sum' (x:xs) = x + (sum' xs)
 
 count_etcs = sum' [x | (_,x,_,_) <- list]
 
---filter_by_cat :: String -> [Module] -> [Module]
-
+filter_by_cat :: String -> [Module] -> [Module]
 filter_by_cat category list = [ m | m <- list, is_of_cat category m]
 
 is_of_cat :: String -> Module -> Bool
 is_of_cat category modul = category' == category
                            where
                               (_,_,category',_) = modul
+                              
+get_name :: Module -> String
+get_name (name,_,_,_) = name
 
-not_in_list modules modul =
-
---has_etcs_of visited
+module_not_in_list :: [String] -> Module -> Bool
+module_not_in_list [] _ = True
+module_not_in_list (m:ms) search
+  | m == (get_name search) = False
+  | otherwise = module_not_in_list ms search
 
 list = [("jpa",2,"sprachen",[]),
   ("jap2",2,"sprachen",["jap1"]),
@@ -39,7 +43,7 @@ enough_etcs_remaining modules minimal_required = all can_fullfil_this_category [
 
 can_still_graduate failed_modules = enough_etcs_remaining modules minCategoryPoints
   where
-    modules = [m | m <- list, not_in_list(failed_modules)]
+    modules = [m | m <- list, module_not_in_list failed_modules m]
 
 assert expected asserted
     | expected == asserted = "Test successful"
@@ -48,7 +52,7 @@ assert expected asserted
 test text expected asserted = do
   putStrLn (text ++ ": " ++ assert expected asserted)
 
-should_fail_when_failed_to_many_grundlagen = can_still_graduate(["wed1", "wed2"])
+should_fail_when_failed_to_many_grundlagen = can_still_graduate ["wed1", "wed2"]
 
 should_pass_if_enough_modules_remaining = can_fullfil_this_category ([
   ("jpa",2,"sprachen",[]),
